@@ -7,56 +7,56 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 
-# Step 1: Load and Clean the Data
-file_path = 'superstore_sales.xlsx'  # Ensure you have the correct file path
+# Load the dataset
+file_path = 'superstore_sales.xlsx'
 df = pd.read_excel(file_path)
 
 # Display basic info about the dataset
 print(df.info())
 
-# Clean the data by dropping rows with missing sales or profit
-df = df.dropna(subset=['Sales', 'Profit'])
+# Clean the data
+# Handling missing values (drop or fill)
+df = df.dropna(subset=['Sales', 'Profit'])  # Drop rows with missing sales or profit
 
 # Ensure 'Order Date' is in datetime format
 df['Order Date'] = pd.to_datetime(df['Order Date'])
 
-# Create new columns for 'Year' and 'Month' for easy grouping
+# Create a new column for 'Year' and 'Month' for easy grouping
 df['Year'] = df['Order Date'].dt.year
 df['Month'] = df['Order Date'].dt.month_name()
 
-# Step 2: Aggregate the data by Year and Month
+# Group by Year and Month for sales and profit aggregation
 monthly_sales = df.groupby(['Year', 'Month'])[['Sales', 'Profit']].sum().reset_index()
 
-# Step 3: Create an Excel Dashboard with Charts
+# Create a new Excel workbook and worksheet
 wb = openpyxl.Workbook()
 ws = wb.active
 ws.title = 'Sales Dashboard'
 
-# Add headers for the data
+# Add the header row
 headers = ['Year', 'Month', 'Total Sales', 'Total Profit']
 ws.append(headers)
 
-# Add the aggregated data to the Excel sheet
+# Add the aggregated data into the Excel sheet
 for index, row in monthly_sales.iterrows():
     ws.append(row.tolist())
 
 # Create a Line Chart for Sales over time
 chart_sales = LineChart()
-data_sales = Reference(ws, min_col=3, min_row=1, max_col=3, max_row=len(monthly_sales)+1)
-chart_sales.add_data(data_sales, titles_from_data=True)
+data = Reference(ws, min_col=3, min_row=1, max_col=3, max_row=len(monthly_sales)+1)
+chart_sales.add_data(data, titles_from_data=True)
 chart_sales.title = "Sales Over Time"
 ws.add_chart(chart_sales, "F5")
 
 # Create a Line Chart for Profit over time
 chart_profit = LineChart()
-data_profit = Reference(ws, min_col=4, min_row=1, max_col=4, max_row=len(monthly_sales)+1)
-chart_profit.add_data(data_profit, titles_from_data=True)
+data = Reference(ws, min_col=4, min_row=1, max_col=4, max_row=len(monthly_sales)+1)
+chart_profit.add_data(data, titles_from_data=True)
 chart_profit.title = "Profit Over Time"
 ws.add_chart(chart_profit, "F20")
 
-# Save the Excel dashboard
-dashboard_file = 'sales_dashboard.xlsx'
-wb.save(dashboard_file)
+# Save the workbook
+wb.save('sales_dashboard.xlsx')
 
 # Step 4: Automate Sending the Dashboard via Email
 def send_email_with_attachment():
@@ -73,11 +73,11 @@ def send_email_with_attachment():
     msg.attach(MIMEText(body, 'plain'))
 
     # Attach the Excel file
-    attachment = open(dashboard_file, 'rb')
+    attachment = open('sales_dashboard.xlsx', 'rb')
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(attachment.read())
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f'attachment; filename={dashboard_file}')
+    part.add_header('Content-Disposition', f'attachment; filename={attachment.name}')
     msg.attach(part)
 
     # Send the email
