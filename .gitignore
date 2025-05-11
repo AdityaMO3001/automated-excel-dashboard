@@ -32,7 +32,6 @@ ENV/
 *.swo
 
 # Project specific
-*.xlsx
 *.xls
 *.csv
 .env 
