@@ -54,8 +54,6 @@ python Superstore_Sales_Automated_Excel.py
 ## Contributing
 Feel free to submit issues and enhancement requests!
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Author
 Aditya Mogadpally 
